@@ -1,0 +1,7 @@
+agent-skills	https://github.com/addyosmani/agent-skills.git	skills	Apache-2.0
+last30days	https://github.com/mvanhorn/last30days-skill.git	.	MIT
+council-of-high-intelligence	https://github.com/0xNyk/council-of-high-intelligence.git	skills/council	MIT
+ponytail	https://github.com/DietrichGebert/ponytail.git	skills	MIT
+impeccable	https://github.com/pbakaus/impeccable.git	plugin/skills/impeccable	MIT
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git	.claude/skills/ui-ux-pro-max	MIT
+claude-video	https://github.com/bradautomates/claude-video.git	skills/watch	MIT

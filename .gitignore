@@ -1,0 +1,8 @@
+.env*
+*.log
+__pycache__/
+projeler/*/
+!projeler/.gitkeep
+gozlemler/*.md
+arsiv/*
+!arsiv/.gitkeep
