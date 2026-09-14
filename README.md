@@ -2,6 +2,18 @@
 
 Claude Code, Antigravity (`agy`) ve Codex için tasarlanmış Türkçe yapay zekâ çalışma ofisi şablonu. Her projeyi izole bir alt klasörde tutar, araçlar arası iş bölümü sağlar ve geliştirme sürecini yapılandırır.
 
+## Kurulum
+
+Claude Code'u boş bir klasörde aç ve şunu yapıştır:
+
+```
+https://github.com/MrMerkus/My-AI-System deposundaki KURULUM.md dosyasını oku ve beni kur. Sadece ofisi istiyorum.
+```
+
+Claude isimleri ve klasörleri tek tek sorar, özeti onaylatır, kurulumu `kur.sh` yapar. Elle kurmak
+istersen depoyu indirip `bash kur.sh` çalıştır. Seçilen yollar `~/.config/my-ai-system/sistem.json`
+dosyasında durur; skill'ler ve araçlar ofis ile hafıza klasörünü oradan okur.
+
 ## 3 Katmanlı Ajan Mimarisi
 
 1. **Ana Döngü — Claude Code:** Mimari kararlar, şartname (spec) yazımı, kod birleştirme ve son sentez. En yüksek akıl ve yargı katmanı.

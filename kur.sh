@@ -37,7 +37,11 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 KOK="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OFIS="${OFIS:-$HOME/ofis}"
+# Yollar: ortam değişkeni > ~/.config/my-ai-system/sistem.json > varsayılan. Bu script sistem.json'a yazmaz.
+SISTEM_JSON="$HOME/.config/my-ai-system/sistem.json"
+json_oku() { [ -f "$SISTEM_JSON" ] && python3 -c 'import json,sys; v=json.load(open(sys.argv[1],encoding="utf-8")).get(sys.argv[2]); print(v or "")' "$SISTEM_JSON" "$1" 2>/dev/null || true; }
+OFIS="${OFIS:-$(json_oku ofis)}"; OFIS="${OFIS:-$HOME/ofis}"
+HAFIZA="${HAFIZA:-$(json_oku hafiza)}"
 CLAUDE_SKILLS="$HOME/.claude/skills"
 AGENTS_SKILLS="$HOME/.agents/skills"
 CLAUDE_AGENTS="$HOME/.claude/agents"

@@ -5,8 +5,19 @@
 
 set -euo pipefail
 
+CONFIG_FILE="$HOME/.config/my-ai-system/sistem.json"
+if [ -f "$CONFIG_FILE" ]; then
+  if [ -z "${OFIS:-}" ]; then
+    OFIS="$(python3 -c "import json; d=json.load(open('$CONFIG_FILE', encoding='utf-8')); print(d.get('ofis') or '')" 2>/dev/null || true)"
+  fi
+  if [ -z "${HAFIZA:-}" ]; then
+    HAFIZA="$(python3 -c "import json; d=json.load(open('$CONFIG_FILE', encoding='utf-8')); print(d.get('hafiza') or '')" 2>/dev/null || true)"
+  fi
+fi
 OFIS="${OFIS:-$HOME/ofis}"
 HAFIZA="${HAFIZA:-}"
+export OFIS
+export HAFIZA
 CLAUDE_DIR="$HOME/.claude"
 AGENTS_DIR="$HOME/.agents"
 

@@ -18,10 +18,40 @@ Kullanım:
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from datetime import date
 from pathlib import Path
+
+
+def ayarlar() -> dict:
+    """Sistem ayarlarını ~/.config/my-ai-system/sistem.json dosyasından okur."""
+    varsayilan = {
+        "sistem_adi": "My AI System",
+        "asistan_adi": "Atlas",
+        "dil": "Türkçe",
+        "kok": str(Path.home() / "yapay-zeka-sistemim"),
+        "hafiza": os.environ.get("HAFIZA"),
+        "ofis": os.environ.get("OFIS") or str(Path.home() / "ofis"),
+    }
+    ayar_dosyasi = Path.home() / ".config" / "my-ai-system" / "sistem.json"
+    if ayar_dosyasi.exists():
+        try:
+            with open(ayar_dosyasi, "r", encoding="utf-8") as f:
+                veri = json.load(f)
+                if isinstance(veri, dict):
+                    varsayilan.update(veri)
+        except Exception:
+            pass
+    if os.environ.get("OFIS"):
+        varsayilan["ofis"] = os.environ["OFIS"]
+    if os.environ.get("HAFIZA"):
+        varsayilan["hafiza"] = os.environ["HAFIZA"]
+    if not varsayilan.get("ofis"):
+        varsayilan["ofis"] = str(Path.home() / "ofis")
+    return varsayilan
+
 
 KOK = Path(__file__).parent
 SOZLUK = KOK / "sozluk.json"

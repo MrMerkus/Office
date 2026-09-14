@@ -105,8 +105,8 @@ Print modunun freni olmadığı için, **yazmasını istemediğin her şeritte b
 Bu bir öneri değil, tek koruma katmanı:
 
 ```bash
-cd ~/ofis/<proje> && timeout 300 agy --model claude-opus-4-6-thinking \
-  --add-dir ~/ofis/<proje> --output-format text \
+cd "$OFIS/<proje>" && timeout 300 agy --model claude-opus-4-6-thinking \
+  --add-dir "$OFIS/<proje>" --output-format text \
   -p='READ ONLY. Do not create, edit or delete any file. Do not run any command that writes.
 Map this codebase: entry points, main modules, how they connect. Report as a short outline.' \
   2>&1 | tail -60

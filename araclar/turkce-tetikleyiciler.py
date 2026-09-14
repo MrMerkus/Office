@@ -6,6 +6,7 @@ Skill'ler güncellendikten sonra bu betiği tekrar çalıştır — kayıp olmaz
 Güvenli: zaten eklenmişse dokunmaz, tekrar tekrar çalıştırılabilir.
 """
 import argparse
+import json
 import os
 import pathlib
 import re
@@ -14,10 +15,42 @@ import sys
 IMZA = "Türkçe tetikleyiciler:"
 
 
+def ayarlar() -> dict:
+    """Sistem ayarlarını ~/.config/my-ai-system/sistem.json dosyasından okur."""
+    varsayilan = {
+        "sistem_adi": "My AI System",
+        "asistan_adi": "Atlas",
+        "dil": "Türkçe",
+        "kok": str(pathlib.Path.home() / "yapay-zeka-sistemim"),
+        "hafiza": os.environ.get("HAFIZA"),
+        "ofis": os.environ.get("OFIS") or str(pathlib.Path.home() / "ofis"),
+    }
+    ayar_dosyasi = pathlib.Path.home() / ".config" / "my-ai-system" / "sistem.json"
+    if ayar_dosyasi.exists():
+        try:
+            with open(ayar_dosyasi, "r", encoding="utf-8") as f:
+                veri = json.load(f)
+                if isinstance(veri, dict):
+                    varsayilan.update(veri)
+        except Exception:
+            pass
+    if os.environ.get("OFIS"):
+        varsayilan["ofis"] = os.environ["OFIS"]
+    if os.environ.get("HAFIZA"):
+        varsayilan["hafiza"] = os.environ["HAFIZA"]
+    if not varsayilan.get("ofis"):
+        varsayilan["ofis"] = str(pathlib.Path.home() / "ofis")
+    return varsayilan
+
+
 def varsayilan_yollar():
+    cfg = ayarlar()
+    ofis_yol = pathlib.Path(cfg.get("ofis") or (pathlib.Path.home() / "ofis"))
     kok = pathlib.Path(__file__).resolve().parent
     kural = os.environ.get("TURKCE_TETIKLEYICILER_MD")
     kural_yol = pathlib.Path(kural) if kural else (kok / "turkce-tetikleyiciler.md")
+    if not kural_yol.exists() and (ofis_yol / "araclar" / "turkce-tetikleyiciler.md").exists():
+        kural_yol = ofis_yol / "araclar" / "turkce-tetikleyiciler.md"
 
     skills = os.environ.get("CLAUDE_SKILLS_DIR")
     skills_yol = pathlib.Path(skills) if skills else (pathlib.Path.home() / ".claude/skills")
