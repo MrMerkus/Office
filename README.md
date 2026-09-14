@@ -14,6 +14,12 @@ Claude isimleri ve klasörleri tek tek sorar, özeti onaylatır, kurulumu `kur.s
 istersen depoyu indirip `bash kur.sh` çalıştır. Seçilen yollar `~/.config/my-ai-system/sistem.json`
 dosyasında durur; skill'ler ve araçlar ofis ile hafıza klasörünü oradan okur.
 
+## Araç uyumluluğu
+
+Bugün **Claude Code**'da tam çalışır ve kurulum onunla test edildi. **Codex** ve **Antigravity**
+için hafıza köprüleri var ama kısmi; **Gemini CLI** ve **Cursor** desteği planlandı. Ayrıntılı
+tablo ve yol haritası: [ARAC-UYUMLULUK.md](https://github.com/MrMerkus/My-AI-System/blob/main/ARAC-UYUMLULUK.md)
+
 ## 3 Katmanlı Ajan Mimarisi
 
 1. **Ana Döngü — Claude Code:** Mimari kararlar, şartname (spec) yazımı, kod birleştirme ve son sentez. En yüksek akıl ve yargı katmanı.
