@@ -18,6 +18,19 @@ Müşteriye website yapma ve arayüz işleri. kullanıcı arada website yapıp s
 
 Hepsini sırayla çalıştırma. İş hangisini gerektiriyorsa **onu sor**.
 
+## Her sayfa işinin sonu: ekran görüntüsüyle bak
+
+"Kod doğru" yetmez. Sayfa yazılınca veya değişince masaüstü (1280px) ve mobil (390px)
+ekran görüntüsü alınır ve **açılıp bakılır**; bu adım onay sorulmadan yapılır, küme kuralı
+değil kalite kapısıdır. 2026-09-10'da üç örnek sitede koddan görünmeyen üç kusur (fotoğraf
+üstünde okunan yazı, gökyüzünde kaybolan nav, butonla çakışan rozet) yalnızca bununla
+yakalandı.
+
+Chrome bu makinede **flatpak** (`com.google.Chrome`); Playwright ve chrome-devtools MCP'leri onu
+bulamaz, "Chrome yok" denmez. Komut ve tuzaklar (`--filesystem=host`, `/tmp`'ye yazamama,
+WebGL için `--enable-unsafe-swiftshader`) `browser-testing-with-devtools` skill'inde; 3B
+içermeyen sayfada yedek yol `firefox --headless --screenshot out.png --window-size=390,2400 <url>`.
+
 ## kullanıcıya özgü not
 
 Bu küme müşteri işi için açılıyor, yani çıktı teslim edilecek. İki şey her seferinde sorulur:

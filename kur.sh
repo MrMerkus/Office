@@ -62,6 +62,13 @@ if [ -f "$KOK/projeler/.gitkeep" ] && [ ! -f "$OFIS/projeler/.gitkeep" ]; then
   cp "$KOK/projeler/.gitkeep" "$OFIS/projeler/.gitkeep"
 fi
 
+# Dış kaynaklı skill bağlanırken aynı adda yerel (ofis/skills) sürüm varsa yerel kazanır:
+# yerel sürüm kullanıcının düzelttiği hâldir (ör. konseyde ağırlıklı koltuk yok).
+bagla_skill() {  # bagla_skill <ad> <kaynak-klasör>
+  if [ -d "$KOK/skills/$1" ]; then echo "    ↷ $1: yerel sürüm öncelikli, dış kaynak bağlanmadı"; return 0; fi
+  ln -sfn "$2" "$CLAUDE_SKILLS/$1"; ln -sfn "$2" "$AGENTS_SKILLS/$1"; echo "    ✔ $1 bağlandı"
+}
+
 echo "==> 2. Yerel beceriler kuruluyor..."
 for s in "$KOK/skills"/*; do
   if [ -d "$s" ]; then
@@ -95,23 +102,17 @@ if [ -f "$UPSTREAM_TSV" ]; then
     # Symlink becerileri
     if [ "$alt_yol" = "." ]; then
       if [ -f "$repo_dir/SKILL.md" ]; then
-        ln -sfn "$repo_dir" "$CLAUDE_SKILLS/$ad"
-        ln -sfn "$repo_dir" "$AGENTS_SKILLS/$ad"
-        echo "    ✔ $ad bağlandı"
+        bagla_skill "$ad" "$repo_dir"
       fi
     elif [ -d "$repo_dir/$alt_yol" ]; then
       if [ -f "$repo_dir/$alt_yol/SKILL.md" ]; then
         skill_ad="$(basename "$alt_yol")"
-        ln -sfn "$repo_dir/$alt_yol" "$CLAUDE_SKILLS/$skill_ad"
-        ln -sfn "$repo_dir/$alt_yol" "$AGENTS_SKILLS/$skill_ad"
-        echo "    ✔ $skill_ad bağlandı"
+        bagla_skill "$skill_ad" "$repo_dir/$alt_yol"
       else
         for alt_skill in "$repo_dir/$alt_yol"/*; do
           if [ -d "$alt_skill" ] && [ -f "$alt_skill/SKILL.md" ]; then
             skill_ad="$(basename "$alt_skill")"
-            ln -sfn "$alt_skill" "$CLAUDE_SKILLS/$skill_ad"
-            ln -sfn "$alt_skill" "$AGENTS_SKILLS/$skill_ad"
-            echo "    ✔ $skill_ad bağlandı"
+            bagla_skill "$skill_ad" "$alt_skill"
           fi
         done
       fi

@@ -13,15 +13,15 @@ Bu blok yukarı akıştaki metni **ezer**. Çelişki olursa burası geçerlidir.
 |---|---|---|
 | Model | `gpt-5.6-sol` | **`gpt-5.6-luna`**. `sol` ChatGPT hesabıyla 400 döner: *"not supported when using Codex with a ChatGPT account"*. Dosyadaki her örnek `luna`'ya çevrildi. |
 | Codex sürümü | 0.128+ | 0.153.4 kurulu, `low/medium/high/xhigh` mevcut. |
-| Yazma izni bayrağı | `--full-auto` | **`--full-auto` 0.153.4'te YOK**, `error: unexpected argument` verir. Yerine `-s workspace-write -c approval_policy=never` yaz. Dosyadaki her `--full-auto` örneği bu ikiliyle okunmalı. (2026-09-11'de iki şerit bu yüzden patladı.) |
+| Yazma izni bayrağı | `--full-auto` | **`--full-auto` 0.153.4'te YOK**, `error: unexpected argument` verir. Yerine `-s workspace-write -c approval_policy=never` yaz. Dosyadaki örnekler 2026-09-24'te bu ikiliye çevrildi; ikisi de `codex exec --help` ve geçersiz değer denemesiyle doğrulandı (`approval_policy`: `untrusted`, `on-failure`, `on-request`, `granular`, `never`). (2026-09-11'de iki şerit bu yüzden patladı.) |
 | Uykuyu engelleme | `caffeinate -i` (macOS) | Linux: `systemd-inhibit --what=idle:sleep`. |
 | Paralel şerit tavanı | ~20 | **4 (mutlak üst sınır 6).** 16 GB RAM, tek makine, aylık AI bütçe tavanı var. |
 | Varsayılan efor | `high` | `high` kalır, ama mekanik şeritte `medium`'a düşür — kota kullanıcının gerçek kısıtı. |
 
 **Bütçe kuralı:** aylık tavan sınırlı. Bir işi Codex'e vermeden önce sor: bu iş gerçekten
 paralel mi, yoksa tek şeritle daha ucuza biter mi? Şüphede kalırsan **tek şerit**.
-Ucuz keşif ve mekanik iş için önce `antigravity-fleet` skill'ine bak (Gemini aboneliği
-Aralık sonuna kadar ayrı bütçede) — Codex'i spec'i yazılmış icra işi için sakla.
+`agy` bırakıldı (SOZLESME Karar 8); keşif de Codex'te, `--sandbox read-only` ile. kullanıcının
+sisteminde her Codex işi `~/ofis/ajans/` şerit protokolünden geçer (`fable-orchestration`).
 
 
 > A single self-contained skill for driving the [Codex CLI](https://github.com/openai/codex) from any agent (Claude Code, Cursor, or your own harness). No external control plane required — everything here runs against a plain local `codex` install. Drop this file into `.claude/skills/codex-fleet/SKILL.md` (or your agent's skills dir) and go.
@@ -85,8 +85,8 @@ codex exec --skip-git-repo-check \
 | Use case | Flags |
 |---|---|
 | Read-only review / analysis / diagnosis (default) | `--sandbox read-only` |
-| Apply local edits | `--sandbox workspace-write --full-auto` |
-| Network access or broad system access | `--sandbox danger-full-access --full-auto` (confirm with user first) |
+| Apply local edits | `-s workspace-write -c approval_policy=never` |
+| Network access or broad system access | `-s danger-full-access -c approval_policy=never` (confirm with user first) |
 
 For a working dir other than CWD: add `-C <DIR>`.
 For escalated reasoning: replace `model_reasoning_effort=high` with `=xhigh`.
@@ -140,7 +140,7 @@ Codex runs on OpenAI's models with their own training cutoffs. Treat it as a pee
 ### Error handling
 
 - If `codex --version` or `codex exec` exits non-zero, stop and report. Do not retry blindly.
-- High-impact flags (`--full-auto`, `--sandbox danger-full-access`, `--dangerously-bypass-approvals-and-sandbox`) require explicit user OK before first use in a session — after that you can keep using them within the same task scope.
+- High-impact flags (`-c approval_policy=never`, `--sandbox danger-full-access`, `--dangerously-bypass-approvals-and-sandbox`) require explicit user OK before first use in a session — after that you can keep using them within the same task scope.
 
 ---
 
@@ -550,13 +550,13 @@ A **fleet** is N `codex exec` delegates working at once. Each lane is a plain ba
 |---|---|---|
 | Model | `gpt-5.6-luna` (`-m gpt-5.6-luna`) | The fleet workhorse. Never silently downgrade. |
 | Reasoning | `high` (`-c model_reasoning_effort=high`) | `xhigh` for genuinely hard lanes (gnarly refactors, debugging); `medium` for grunt/mechanical lanes. |
-| Sandbox | `--full-auto` for write lanes; `--sandbox read-only` for read/review lanes | Write lanes need to edit their claimed files. Only grant what the lane needs. |
+| Sandbox | `-s workspace-write -c approval_policy=never` for write lanes; `--sandbox read-only` for read/review lanes | Write lanes need to edit their claimed files. Only grant what the lane needs. |
 | Working dir | `-C <lane dir>` | Anchor each lane in its claimed directory or worktree. |
 
 ### Spawn recipe (one lane)
 
 ```bash
-codex exec --skip-git-repo-check --full-auto \
+codex exec --skip-git-repo-check -s workspace-write -c approval_policy=never \
   -C <LANE_DIR> \
   -m gpt-5.6-luna \
   -c model_reasoning_effort=high \
@@ -571,7 +571,7 @@ Fire it with `run_in_background: true`. The brief is the lane's **entire contrac
 
 - **Stagger the spawns** (2–5s apart): firing every lane's first model call simultaneously is a thundering herd. In a live 23-lane run, 2 lanes wedged on dead connections at startup and sat silent for 30 minutes. The stagger costs a minute; a zombie costs half an hour.
 - **Real ceiling on this machine ≈ 4 concurrent lanes (6 absolute max).** 16 GB RAM total, single machine, capped monthly AI budget. The upstream "20 lanes" number assumes a much larger rig and budget — do not use it here.
-- **Tier the lanes**: quick read/explore lanes → `medium` read-only; standard write lanes → `high` full-auto; deep refactor / gnarly debugging / review-gate lanes → `xhigh`.
+- **Tier the lanes**: quick read/explore lanes → `medium` read-only; standard write lanes → `high` workspace-write; deep refactor / gnarly debugging / review-gate lanes → `xhigh`.
 - **Read lanes stay read-only**: give review/analysis lanes `--sandbox read-only` so they physically cannot edit. Escalate to a write lane if edits are needed — don't tell a read lane to patch.
 - **Liveness check from the surface side**: a codex lane whose log file hasn't grown for many minutes with zero tool calls is dead regardless of the process table. Respawn it with the same brief.
 - **Completions are claims, not evidence.** "Succeeded" from a lane means it *thinks* it's done. Run the lane's acceptance check yourself (targeted typecheck / lint / tests in its dir) before integrating.
@@ -606,6 +606,40 @@ No live collisions, linear history with each lane's commit preserved, orchestrat
 - **Re-verify "already fixed" claims live.** A lane that verifies a fix only against an in-memory/demo store has verified nothing — FK ordering, contention, and real-data edge cases exist only against the real backend.
 - **Honest failure beats a cheerful lie.** A lane reporting "failed: sibling's mid-flight edit broke cross-package typecheck" is often fine — read the failure note; "outside my lane" usually means integrate normally and verify at the gate.
 - **Expect other work on the machine.** Only act on your own fleet's lanes/logs; never reap processes you didn't spawn without inspecting them first.
+
+---
+
+## Dersler (`antigravity-fleet`'ten taşındı, 2026-09-24)
+
+`agy` bırakıldı (SOZLESME Karar 8); onun şeritlerinde öğrenilenler katmandan bağımsız ve
+Codex şeritleri için de geçerli.
+
+- **Çıkış kodu 0 "bitti" demek değil.** Şeritler hiçbir şey yazmadan, log boş ve kod 0 ile
+  kapandı. Her şeritten sonra `git status`, beklenen dosyanın varlığı veya log uzunluğu
+  kontrol edilir.
+- **Yarım şerit birikimiyle devredilir, sıfırdan başlamaz.** Logdaki somut bulgular (bulunan
+  adresler, başarısız URL'ler ve HTTP kodları, doğrulanmış sürümler, kısmi dosyaların yolu ve
+  boyutu) yeni brief'e "önceki şerit şuraya kadar geldi" başlığıyla aynen yazılır. Şeritler
+  çoğunlukla son adımda düşer; zor kısım genelde çözülmüştür.
+- **Sözleşme dosyası deseni** (PilotHUD, 4 tekrar, çakışma sıfır). Aynı projeye birden fazla
+  yazan şerit gidecekse önce `sozlesme-<iş>.md` yazılır, her brief "önce bunu oku" diye başlar:
+  (1) sahiplik tablosu: şerit → sahip olduğu / dokunmayacağı dosyalar; (2) arayüz sözleşmesi:
+  DOM id'leri, fonksiyon imzaları, olay adları; (3) şerit başına kabul komutu; (4) git kuralı:
+  yazan şeritler commit/push atmaz, sondaki tek test şeridi doğrular ve commit'ler.
+- **Yedekli şerit** yalnız kullanıcı "yedekli aç" derse ya da iş tek şeride güvenilmeyecek kadar
+  kritikse: aynı brief 2-3 kopya, her biri `git worktree add ../<iş>-A -b yedek/A` ile kendi
+  dalında tek commit; en temizi `git merge --ff-only yedek/<X>`, sonra worktree ve dal silinir.
+- **Kırılgan hedefe yazma.** İndirme ve doğrulama sağlam diskte (sağlama toplamıyla); USB,
+  SD kart, ağ sürücüsüne yalnız son adımda kopyalanır ve geri okunarak doğrulanır.
+- **Araştırma şeridinin kaynak disiplini.** Model bilmediğini uydurur; en çok kişi adı,
+  kaynak adresi ve tablo hücresi. Ana sayfa kaynak sayılmaz, olgunun geçtiği sayfanın tam
+  adresi istenir; adres yoksa hücreye "bilinmiyor". Kişi adı her biri için doğrulama URL'i
+  ister. Kararı taşıyan satırlardan ikisi ana döngüde elle doğrulanır. Araştırma şeridine
+  "en fazla N sayfa aç, sonra yaz" sınırı konur.
+- **Şerit durdururken `pkill -f '<dize>'` kullanma:** aynı dizeyi içeren kendi arka plan
+  kabuğunu da öldürür. Task ID ile durdur.
+- **Kasa hiçbir şeride girmez:** `🔐 kasa/`, telefondaki `Girdiler` günlüğü ve
+  kişisel şifre dosyaları ne `-C`/`--add-dir` ile ne brief içinde verilir.
 
 ---
 

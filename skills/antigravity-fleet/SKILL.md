@@ -1,9 +1,13 @@
 ---
 name: antigravity-fleet
-description: "Antigravity CLI (`agy`) runner and fleet orchestrator — the cheap tier of the user's stack. Hands recon, codebase mapping, research sweeps, reviews and mechanical edits to Claude Opus 4.6 or Gemini via `agy -p` (default model order is documented inside), one lane or several in parallel, always EXECUTING rather than describing. Paid separately (Gemini Pro subscription through December), so it does NOT consume the Claude or Codex budget. Triggers on: 'agy', 'antigravity', 'gemini'ye ver', 'geminiye sor', 'ucuz katmana ver', 'alt ajana tara', 'keşif yap', 'şu klasörde ne var', 'bunu tarasın', 'ucuza yaptır', any recon/mapping/summarize task big enough to be worth offloading."
+description: "DEPRECATED — agy bırakıldı (SOZLESME Karar 8, 2026-09-23); tetiklenmez. Keşif ve icra Codex'te (codex-fleet), delege politikası fable-orchestration'da."
 ---
 
 # Antigravity Fleet — ucuz katman koşucusu
+
+> **DEPRECATED (2026-09-24).** `agy` bırakıldı (SOZLESME Karar 8, 2026-09-23). Bu dosya
+> yalnız kayıt için duruyor; şerit açmak için kullanılmaz. Katmandan bağımsız dersler
+> `codex-fleet` SKILL.md'deki "Dersler" bölümüne taşındı.
 
 `agy`, Google Antigravity'nin CLI'ı. kullanıcının yığınında **ucuz alt katman**: Gemini
 aboneliği Aralık sonuna kadar ayrı bir bütçeden ödenmiş durumda, harcanmazsa kayboluyor.
@@ -48,18 +52,56 @@ ile arka plana gider; harness bitince haber verir.
   `-medium` / `-low`, `gemini-3.1-pro-high` / `-low`, `claude-sonnet-4-6`,
   `claude-opus-4-6-thinking`, `gpt-oss-120b-medium`.
 
+## Şerit açmadan önce kotaya bak
+
+`codexbar usage --provider antigravity` (CodexBar CLI ≥ 0.60.2) iki havuzu ayrı gösterir:
+**Gemini** ve **Claude/GPT** (Opus 4.6 ve Sonnet 4.6 bu havuzdan yer), her biri için 5 saatlik
+ve haftalık kalan yüzde. Kota dolu modelde şerit çıkış kodu 0 ile sessizce düşer; bu yüzden
+Claude/GPT havuzu %0 ise sıraya doğrudan Gemini'den başlanır. (2026-09-14: eski CodexBar
+CSRF anahtarı yüzünden okuyamıyordu, 0.60.2 düzeltti.)
+
+## Gemini CLI bu aboneliği kullanamaz
+
+2026-09-14'te denendi: Gemini CLI 0.59.0'da "Sign in with Google" bireysel hesaplar için
+kapalı (*"This client is no longer supported for Gemini Code Assist for individuals… migrate to
+the Antigravity suite"*). Gemini aboneliği yalnızca Antigravity (IDE + `agy`) üzerinden
+kullanılır. Gemini CLI ancak API anahtarı (dar ücretsiz limit, sonra token başına ücret) veya
+Vertex AI (ücretli) ile çalışır; bu yüzden ucuz katman ve toplu alt ajan işi için alternatif
+değildir.
+
 ## Varsayılan model sırası
 
-kullanıcı 2026-09-12'de bu sırayı kendi eliyle koydu. **Şerit açarken listenin başından
-başlanır, başarısız olan veya kotası dolan modelde bir alt sıraya inilir.**
+kullanıcı bu sırayı 2026-09-19'da yeniden koydu (önceki sıra 2026-09-12, Opus başta).
+**Şerit açarken listenin başından başlanır, başarısız olan veya kotası dolan modelde bir
+alt sıraya inilir.**
 
 | Sıra | Model kimliği | Ne için |
 |---|---|---|
-| 1 | `claude-opus-4-6-thinking` | Varsayılan. Yargı ve hassasiyet isteyen her şerit. |
-| 2 | `gemini-3.8-flash-high` | Opus düştüğünde ve toplu, mekanik, hızlı taramalarda. |
-| 3 | `gemini-3.7-flash-high` | Üstteki ikisi düştüğünde. |
-| 4 | `claude-sonnet-4-6` | Dördüncü sıra; Opus'a en yakın yedek. |
-| 5+ | Gerisi serbest | `gemini-3.1-pro-*`, `gemini-3.6-flash-*`, `gpt-oss-120b-medium` — duruma göre seçilir. |
+| 1 | `claude-sonnet-4-6` | Varsayılan, araştırma dahil her şerit. |
+| 2 | `claude-opus-4-6-thinking` | Sonnet düştüğünde ya da kotası bittiğinde. |
+| 3 | `gemini-3.8-flash-high` | Claude/GPT havuzu boşsa; toplu, mekanik taramalar. |
+| 4 | `gemini-3.7-flash-high` | Üstteki üçü düştüğünde. |
+| 5+ | Gerisi serbest | `gemini-3.6-flash-*`, `gpt-oss-120b-medium` — duruma göre seçilir. |
+
+**Neden Sonnet başta (2026-09-19, Minecraft mod araştırması):** aynı araştırmada 4 Gemini
+Flash şeridi uydurma bir mod ("Techno-Magic World"), başka modlara çıkan mcmod.cn
+adresleri, şişik indirme sayıları ve yanlış sürümler üretti; Sonnet (Claude Code alt
+ajanı olarak, ~100K token) uydurmasız döndü, iki iddiası elle doğrulandı. kullanıcı: *"hem agy
+limitleri daha iyi gider hem de gemini'nin boklukları ile yorulmayız."* Sonnet ve Opus
+`agy`'de aynı **Claude/GPT havuzundan** yer; o havuz haftalık dolarsa sıra Gemini'ye iner.
+Gemini şeridinin çıktısı kararı taşıyorsa örneklem doğrulaması iki satırla sınırlı kalmaz.
+
+**`gemini-3.1-pro-*` kullanılmaz** (kullanıcının kararı, 2026-09-14). PilotHUD oturumunda uzun,
+çok adımlı iki şeritte (harita araştırması, harita JS entegrasyonu) hiçbir şey yazmadan
+çıkış kodu 0 ile sessizce düştü; aynı işleri `gemini-3.8-flash-high` bitirdi. İnceleme ve
+push şeritleri dahil hiçbir şeride verilmez.
+
+**Sessiz düşme Flash'ta da oluyor (2026-09-14 ölçümü).** Aynı oturumda 3.8 Flash 12
+şeritten 3'ünde hiçbir şey yazmadan, log boş ve çıkış kodu 0 ile kapandı. Düşenler hem
+paralel hem tek başına çalışan şeritlerdi, sebep bulunamadı. 3.7 Flash devralınan 3
+şeridin hepsini bitirdi. Sonuç: **çıkış kodu 0 ve boş log "bitti" demek değildir**; her
+şeritten sonra `git status`, beklenen dosyanın varlığı veya log uzunluğu kontrol edilir,
+boşsa iş 3.7 Flash'a devredilir.
 
 ### Yarım kalan şerit birikimiyle devredilir
 
@@ -74,14 +116,13 @@ adımda düşer — yani zor kısım genelde çözülmüş olur.
 Bu sıra, skill'in eski "Antigravity içindeki Claude modellerini kullanma" kuralını
 **iptal eder.** Gerekçe: `agy` içinden çağrılan Claude, Gemini aboneliğinden ödenir ve
 Claude Code kotasına dokunmaz — yani ucuz katmanın amacı Claude'dan kaçınmak değil,
-**Claude Code kotasının dışında kalmaktır.** Opus 4.6 orada en kaliteli icra seçeneği
-olduğu için birinci sıradadır.
+**Claude Code kotasının dışında kalmaktır.**
 
 ## Kilitli varsayılanlar
 
 | Ayar | Değer | Ne zaman değiştir |
 |---|---|---|
-| Model | `claude-opus-4-6-thinking` | Yukarıdaki varsayılan model sırasına bak. Toplu, mekanik, ucuz tarama → `gemini-3.8-flash-high`. Model düşerse sırada bir alta in. |
+| Model | `claude-sonnet-4-6` | Yukarıdaki varsayılan model sırasına bak. Claude/GPT havuzu boşsa → `gemini-3.8-flash-high`. Model düşerse sırada bir alta in. |
 | Çıktı | `--output-format text` | Çıktıyı script'le işleyeceksen `json`. |
 | Kapsam | `-C` yerine `cd <dir>` + `--add-dir <dir>` | Şerit birden fazla klasör görecekse `--add-dir` tekrarlanır. |
 | Zaman aşımı | `timeout 240` sar | Ağır tarama → 600. `--print-timeout` varsayılanı 5 dk. |
@@ -91,7 +132,7 @@ olduğu için birinci sıradadır.
 
 ```bash
 cd <ÇALIŞMA_DİZİNİ> && timeout 240 agy \
-  --model claude-opus-4-6-thinking \
+  --model claude-sonnet-4-6 \
   --add-dir <ÇALIŞMA_DİZİNİ> \
   --output-format text \
   -p='<KENDİ KENDİNE YETEN BRIEF>' 2>&1 | tail -40
@@ -105,8 +146,8 @@ Print modunun freni olmadığı için, **yazmasını istemediğin her şeritte b
 Bu bir öneri değil, tek koruma katmanı:
 
 ```bash
-cd "$OFIS/<proje>" && timeout 300 agy --model claude-opus-4-6-thinking \
-  --add-dir "$OFIS/<proje>" --output-format text \
+cd ~/ofis/<proje> && timeout 300 agy --model claude-sonnet-4-6 \
+  --add-dir ~/ofis/<proje> --output-format text \
   -p='READ ONLY. Do not create, edit or delete any file. Do not run any command that writes.
 Map this codebase: entry points, main modules, how they connect. Report as a short outline.' \
   2>&1 | tail -60
@@ -132,9 +173,67 @@ cd <DIR> && timeout 300 agy --model gemini-3.8-flash-high --add-dir <DIR> \
 - **"Bitti" bir iddiadır, kanıt değil.** Kabul kontrolünü sen çalıştır.
 - Logu dakikalardır büyümeyen şerit ölmüştür; aynı briefle yeniden fırlat.
 
+### Sözleşme dosyası deseni (2026-09-15, PilotHUD'da 4 kez tekrarlandı, çakışma sıfır)
+
+Aynı projeye birden fazla yazan şerit gidecekse brief'ler tek tek yazılmaz; önce ana döngü
+bir **sözleşme dosyası** yazar (`$SCRATCHPAD/sozlesme-<iş>.md`), her şeridin brief'i
+"önce bu dosyayı oku" diye başlar. Sözleşmede dört bölüm olur:
+
+1. **Sahiplik tablosu:** şerit → sahip olduğu dosyalar → dokunmayacağı dosyalar (ve sahibi).
+2. **Arayüz sözleşmesi:** şeritlerin birbirine dayandığı adlar — DOM id'leri, fonksiyon
+   imzaları, CSS sınıfları, olay adları. Biri adı değiştirirse diğeri kırılır; burada kilitlenir.
+3. **Kabul kontrolü:** her şeridin bitti saymak için çalıştıracağı komut.
+4. **Git kuralı:** yazan şeritler **commit ve push atmaz**. En sonda tek bir test şeridi
+   (başsız tarayıcı veya test komutu) hepsini doğrular, tek commit atar, push eder.
+
+### Yedekli şerit (2026-09-15, iki denemede üç kopyadan yalnızca biri bitti)
+
+Şeritler sessizce düşüyor ve kota iş ortasında doluyor. Kritik bir işte aynı brief **2-3
+kopya**, **farklı model karışımıyla** (ör. 3.8 Flash high + 3.7 Flash high + 3.7 Flash medium)
+aynı anda fırlatılabilir. kullanıcı "yedekli aç" derse veya iş tek şeride güvenilmeyecek kadar
+önemliyse kullanılır; varsayılan değildir, kota yer.
+
+- **Salt okuma kopyası:** her kopya ayrı rapor dosyasına yazar (`rapor-A.md`, `rapor-B.md`).
+- **Kod değiştiren kopya:** `git worktree add ../<iş>-A -b yedek/A` — her kopya kendi
+  worktree'sinde kendi dalına tek commit atar. Ana döngü bitenleri karşılaştırır, en temizini
+  `git merge --ff-only yedek/<X>` ile alır, sonra `git worktree remove` + dal silme.
+
+### Kırılgan hedefe yazma (2026-09-12, USB bellek arızası)
+
+İndirme ve doğrulama **sağlam diskte** yapılır (sağlama toplamı alınır); USB bellek, SD kart,
+ağ sürücüsü gibi kırılgan hedefe yalnızca son adımda kopyalanır ve **geri okunarak** doğrulanır.
+Hedef düşerse maliyet "baştan indir" değil "son kopyayı tekrarla" olur.
+
 ## Ne buraya gitmez
 
 - Mimari kararı, spec yazımı, sözleşmeye duyarlı tasarım → ana döngü.
 - Spec'i yazılmış hassas icra, doğruluk kritik refactor → `codex-fleet`.
-- Kullanıcının hassas dosyaları (şifreler, özel notlar, kişisel günlükler) **hiçbir şeride
-  verilmez** — ne `--add-dir` ile, ne brief içinde.
+- kullanıcının kişisel dosyaları: `🔐 kasa/`, telefondaki `Girdiler` günlüğü ve
+  kişisel şifre dosyaları **hiçbir şeride verilmez** — ne `--add-dir` ile, ne brief içinde.
+
+## Güncel bilgi araştırmasında sınırlar (2026-09-15 ölçümü)
+
+- **3.6 Flash yeni şey aramıyor.** "2025-2026 modellerini bul, her iddiaya link koy" briefiyle
+  iki turda da yalnızca bildiği eski sayfaları (Qwen2.5, Gemma 3) açıp doğruladı; 2026
+  modellerini hiç bulmadı. Güncel liste gerekiyorsa şeride değil doğrudan kaynağa bak
+  (ör. Hugging Face API `huggingface.co/api/models?author=X&sort=createdAt&direction=-1`).
+- **Geniş kapsamlı 3.8 Flash şeritleri 14 dk `--print-timeout`'ta boş düştü** (3 şeritten 2'si,
+  kısmi çıktı da yazmadı). Araştırma şeridine "en fazla N sayfa aç, sonra yaz" sınırı konur.
+- **Şerit durdururken `pkill -f '<model adı>'` kullanma:** aynı dizeyi içeren kendi arka plan
+  kabuğunu da öldürür. Task ID ile durdur.
+
+## Araştırma şeridinin kaynak disiplini (0022, 0026 — üç kez tekrarladı)
+
+Ucuz katman bilmediğini "bilmiyorum" diye yazmaz, makul görünen bir şey uydurur. En kolay
+uydurulan üç tür: **kişi adları** (sporcu, hoca, yetkili), **kaynak adresleri** ve **özellik
+tablolarındaki hücreler**. Brief'e "kaynak koy" yazmak yetmedi; üç şeritte de kaynak sütunu
+ana sayfa adresleriyle doldu.
+
+- **Ana sayfa kaynak sayılmaz.** Brief şart koşar: olgunun geçtiği **belge sayfasının tam
+  adresi** verilir (`docs.x.com/hooks#sessionstart`), `docs.x.com` değil. Adres yoksa hücreye
+  "bilinmiyor" yazılır — tahmin yazılmaz.
+- **Kişi adı isteyen brief her ad için doğrulama URL'i ister.** URL'siz ad rapora girmez.
+  Gemini Flash Türkiye federasyonları için uydurma hoca adları üretti; bir kısmı hiç yoktu.
+- **Ana döngü örneklem kontrolü yapar.** Rapordaki kararı taşıyan satırlardan ikisi kaynaktan
+  elle doğrulanır. 14 araçlık uyumluluk tablosunda iki iddiadan biri yanlış çıktı: rapor
+  "kısmi" dedi, belgede özelliğin tamamı vardı.

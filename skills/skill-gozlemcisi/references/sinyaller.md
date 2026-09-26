@@ -6,7 +6,7 @@ kaydedilmeye değer olup olmadığından emin olmadığında, bir oturumdan çok
 gerektiğine karar verirken yükle.
 
 Kaynak: `one-skill-to-rule-them-all/references/signals.md` (CC BY 4.0, Eoghan Henn),
-hafıza sistemine uyarlanmış hâli.
+NemesesOS'a uyarlanmış hâli.
 
 ## Yeni skill sinyalleri
 

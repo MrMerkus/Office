@@ -20,6 +20,15 @@ hem öğretmeli.
 
 **İki satırlık bir düzeltme için bu akışın tamamını başlatma.** Küçük iş küçük kalır.
 
+## Sahada test edilen uygulamaya teşhis satırı
+
+Kodu ancak kullanıcının telefonda veya sahada deneyebildiği işlerde (sensör, GPS, kamera, ağ)
+ilk sürümden itibaren ekranın bir köşesine **küçük bir teşhis satırı** konur: veri kaynağı,
+son değer, saniyedeki güncellenme sayısı ve kaynak sessizse neden (ör. `İZİN YOK`,
+`SENSÖR ENGELLİ`). 2026-09-15'te PilotHUD pusulasında kullanıcının gönderdiği tek ekran
+görüntüsündeki `GPS 003 +00 0Hz` satırı, kodu açmadan sorunun tarayıcı izni olduğunu
+gösterdi. Teşhis turu sayısını ciddi kısaltır; yayın sürümünde bir ayarla gizlenir.
+
 ## kullanıcıya özgü not
 
 Öğrenme hedefi var. Kod yazıldıktan sonra *neden öyle yazıldığı* tek cümleyle söylenir — ama

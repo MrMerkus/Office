@@ -47,6 +47,8 @@ Kısıtlar: yazı yok, filigran yok, imza yok; <eskizde yok sayılacaklar>; <neg
 
 - Eskiz yüklenirse rolü açıkça yazılır: "kompozisyon ve duruş için; çizgi kalitesini kopyalama".
 - Düzeltme promptu **yalnızca değişecek şeyi** söyler: "Sadece X'i değiştir; Y ve Z aynen kalsın."
+- **Prompt İngilizce yazılır** (kullanıcıya açıklama Türkçe). Görsel modeli İngilizceyi daha
+  isabetli izliyor; 2026-09-15'te Türkçe yazdım, kullanıcı yakaladı.
 - Başkasına ait stil referans görselleri **yüklenmez**; stil kelimeyle tarif edilir.
 - (2026-09-13 ölçüldü) Aynı sohbette düzeltme kimliği korur; "ilk sürümdeki yüze dön, son
   sürümdeki elbiseyi koru" gibi **sürüm birleştirme** tek turda tuttu. Tek düzeltmede 3 istek
